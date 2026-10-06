@@ -1,161 +1,162 @@
-# API Yatube
+# Yatube API
 
-## Описание
+REST API for a social networking platform built with Django REST Framework.
 
-API Yatube — это REST API для социальной сети, которая позволяет пользователям:
-- Создавать и редактировать посты
-- Оставлять комментарии к постам
-- Подписываться на других пользователей
-- Добавлять посты в сообщества
+The API allows users to publish posts, leave comments, join communities, and follow other users.
 
-Проект построен на базе Django REST Framework и использует JWT-аутентификацию для защиты запросов. API предоставляет полный набор операций CRUD для работы с постами, комментариями, группами и подписками.
+## Features
 
-## Установка
+- JWT authentication
+- Creating, editing, and deleting posts
+- Adding images to posts
+- Comments on posts
+- Communities
+- Following other users
+- Search through subscriptions
+- Author-only editing and deletion
+- Pagination
+- API documentation with ReDoc
+- Automated API tests
 
-### Требования
-- Python 3.8+
-- pip
-- virtualenv (рекомендуется)
+## Tech Stack
 
-### Шаги установки
+- Python
+- Django
+- Django REST Framework
+- Simple JWT
+- Djoser
+- SQLite
+- pytest
+- Postman
 
-1. **Клонируйте репозиторий:**
-   ```bash
-   git clone https://github.com/P-Kulakova/api-final-yatube.git
-   cd api-final-yatube
-   ```
+## API Features
 
-2. **Создайте и активируйте виртуальное окружение:**
-   ```bash
-   python -m venv venv
-   
-   # На Windows:
-   venv\Scripts\activate
-   
-   # На Mac/Linux:
-   source venv/bin/activate
-   ```
+### Posts
 
-3. **Установите зависимости:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Authenticated users can create posts.
 
-4. **Выполните миграции базы данных:**
-   ```bash
-   cd yatube_api
-   python manage.py migrate
-   ```
+Posts can be read by other users, but only the author can edit or delete their own content.
 
-5. **Запустите сервер:**
-   ```bash
-   python manage.py runserver
-   ```
+### Comments
 
-Сервер будет доступен по адресу `http://127.0.0.1:8000/`
+Comments are nested under posts:
 
-## Примеры запросов к API
-
-### Аутентификация
-
-Получение JWT токена:
-```http
-POST /api/v1/jwt/create/
-Content-Type: application/json
-
-{
-  "username": "your_username",
-  "password": "your_password"
-}
+```text
+/api/v1/posts/{post_id}/comments/
 ```
 
-Ответ:
-```json
-{
-  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc...",
-  "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
-}
+Only the comment author can modify or delete a comment.
+
+### Communities
+
+Communities are available through read-only API endpoints.
+
+### Following
+
+Authenticated users can follow other users and search through their subscriptions.
+
+The API prevents:
+
+- following yourself;
+- creating duplicate subscriptions.
+
+A database constraint also guarantees that each subscription pair is unique.
+
+## Permissions
+
+The project uses a custom `IsAuthorOrReadOnly` permission.
+
+Safe HTTP methods are available for reading content, while modifying an object requires authentication and ownership of that object.
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/P-Kulakova/api-final-yatube.git
+cd api-final-yatube
 ```
 
-### Работа с постами
+Create and activate a virtual environment:
 
-**Получить список всех постов:**
-```http
-GET /api/v1/posts/
-Authorization: Bearer {access_token}
+### Windows
+
+```bash
+python -m venv venv
+venv\Scripts\activate
 ```
 
-**Создать новый пост:**
-```http
-POST /api/v1/posts/
-Authorization: Bearer {access_token}
-Content-Type: application/json
+### Linux / macOS
 
-{
-  "text": "Мой первый пост!",
-  "group": 1
-}
+```bash
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-### Работа с комментариями
+Install dependencies:
 
-**Получить комментарии к посту:**
-```http
-GET /api/v1/posts/{post_id}/comments/
-Authorization: Bearer {access_token}
+```bash
+pip install -r requirements.txt
 ```
 
-**Добавить комментарий к посту:**
-```http
-POST /api/v1/posts/{post_id}/comments/
-Authorization: Bearer {access_token}
-Content-Type: application/json
+Go to the Django project directory:
 
-{
-  "text": "Отличный пост!"
-}
+```bash
+cd yatube_api
 ```
 
-### Работа с сообществами
+Apply migrations:
 
-**Получить список сообществ:**
-```http
-GET /api/v1/groups/
-Authorization: Bearer {access_token}
+```bash
+python manage.py migrate
 ```
 
-**Получить конкретное сообщество:**
-```http
-GET /api/v1/groups/{id}/
-Authorization: Bearer {access_token}
+Run the development server:
+
+```bash
+python manage.py runserver
 ```
 
-### Работа с подписками
+The API will be available at:
 
-**Получить список подписок:**
-```http
-GET /api/v1/follow/
-Authorization: Bearer {access_token}
+```text
+http://127.0.0.1:8000/api/v1/
 ```
 
-**Подписаться на пользователя:**
-```http
-POST /api/v1/follow/
-Authorization: Bearer {access_token}
-Content-Type: application/json
+## API Documentation
 
-{
-  "following": "username"
-}
+After starting the server, ReDoc documentation is available at:
+
+```text
+http://127.0.0.1:8000/redoc/
 ```
 
-После запуска сервера документация API доступна по адресам:
-- **ReDoc:** `http://127.0.0.1:8000/redoc/`
+The repository also includes a Postman collection for testing the API.
 
-## Автор
+## Testing
 
-Polina Kulakova
+Run the automated test suite from the repository root:
 
-Учебный проект для изучения Django REST Framework.
+```bash
+pytest
+```
 
+## Main Endpoints
 
+```text
+/api/v1/posts/
+/api/v1/posts/{post_id}/comments/
+/api/v1/groups/
+/api/v1/follow/
+/api/v1/jwt/create/
+/api/v1/jwt/refresh/
+/api/v1/jwt/verify/
+```
+
+## Author
+
+**Polina Kulakova**
+
+Python Backend Developer
+
+GitHub: [P-Kulakova](https://github.com/P-Kulakova)
